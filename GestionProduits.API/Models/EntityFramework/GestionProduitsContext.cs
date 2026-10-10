@@ -41,7 +41,7 @@ namespace GestionProduits.API.Models.EntityFramework
             modelBuilder.HasDefaultSchema("public");
 
             modelBuilder.Entity<Produit>()
-                        .HasIndex(t => t.Titre);
+                        .HasIndex(t => t.NomProduit);
 
             OnModelCreatingPartial(modelBuilder);
         }

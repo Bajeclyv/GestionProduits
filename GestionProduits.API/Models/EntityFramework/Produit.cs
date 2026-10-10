@@ -12,26 +12,26 @@ namespace GestionProduits.API.Models.EntityFramework
         public int ProduitId { get; set; }
 
         [Column("pdt_nomproduit")]
-        public string NomProduit { get; set; }
+        public string NomProduit { get; set; } = "";
 
         [Column("pdt_description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [Column("pdt_nomphoto")]
-        public string NomPhoto { get; set; }
+        public string? NomPhoto { get; set; }
 
         [Column("pdt_uriphoto")]
-        public string UriPhoto { get; set; }
+        public string? UriPhoto { get; set; }
 
         [ForeignKey("TypeProduitId")]
         [InverseProperty(nameof(Marque.Produits))]
         [DeleteBehavior(DeleteBehavior.Restrict)]
-        public Marque MarqueProduit { get; set; }
+        public Marque? MarqueProduit { get; set; }
 
         [ForeignKey("MarqueId")]
         [InverseProperty(nameof(TypeProduit.Produits))]
         [DeleteBehavior(DeleteBehavior.Restrict)]
-        public TypeProduit Type { get; set; }
+        public TypeProduit? Type { get; set; }
 
         [Column("pdt_stockreel")]
         public int StockReel { get; set; }

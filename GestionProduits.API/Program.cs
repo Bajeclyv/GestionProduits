@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 
 namespace GestionProduits.API
 {
@@ -6,6 +7,9 @@ namespace GestionProduits.API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            var connectionString = builder.Configuration.GetConnectionString("GestionProduitsContext") ?? throw new InvalidOperationException("Connection string 'GestionProduitsContext' not found.");
+
+            builder.Services.AddDbContext<GestionProduitsContext>(options => options.UseNpgsql(connectionString));
 
             // Add services to the container.
 
