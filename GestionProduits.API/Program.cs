@@ -1,3 +1,6 @@
+using GestionProduits.API.Models.DataManager;
+using GestionProduits.API.Models.EntityFramework;
+using GestionProduits.API.Models.Repository;
 using Microsoft.EntityFrameworkCore;
 
 namespace GestionProduits.API
@@ -17,6 +20,9 @@ namespace GestionProduits.API
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddScoped<IDataRepository<Produit>, IProduitRepository>();
+            builder.Services.AddScoped<IProduitRepository, ProduitManager>();
 
             var app = builder.Build();
 

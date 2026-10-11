@@ -9,7 +9,7 @@ using System.Xml.Linq;
 
 namespace GestionProduits.API.Models.DataManager
 {
-    public class ProduitManager : IDataRepository<Produit>
+    public class ProduitManager : IProduitRepository
     {
         readonly GestionProduitsContext _context;
 
@@ -57,22 +57,32 @@ namespace GestionProduits.API.Models.DataManager
 
         public async Task<IEnumerable<Produit>> GetAllWithDetailsAsync()
         {
-            throw new NotImplementedException();
+            return await _context.Produits
+                .Include(p => p.MarqueProduit)
+                .Include(p => p.Type)
+                .ToListAsync();
         }
 
         public async Task<Produit?> GetByIdWithDetailsAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _context.Produits
+                .Include(p => p.MarqueProduit)
+                .Include(p => p.Type)
+                .FirstOrDefaultAsync(u => u.ProduitId == id);
         }
 
         public async Task<IEnumerable<Produit>> GetByMarqueAsync(int idMarque)
         {
-            return await _context.Produits.Where(u => u.MarqueProduit.MarqueId == idMarque).ToListAsync();
+            return await _context.Produits
+                .Where(u => u.MarqueProduit.MarqueId == idMarque)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Produit>> SearchByNameAsync(string name)
         {
-            return await _context.Produits.Where(u => u.NomProduit.ToUpper() == name.ToUpper()).ToListAsync();
+            return await _context.Produits
+                .Where(p => p.NomProduit.Contains(name))
+                .ToListAsync();
         }
     }
 }
