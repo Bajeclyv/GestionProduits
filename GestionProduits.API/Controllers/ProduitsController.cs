@@ -17,6 +17,7 @@ public class ProduitsController : ControllerBase
 
     // GET: api/Produit
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<Produit>>> GetAll()
     {
         var produits = await _repository.GetAllAsync();
@@ -26,6 +27,8 @@ public class ProduitsController : ControllerBase
 
     // GET: api/Produit/5
     [HttpGet("{produitid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<Produit>> GetById(int id)
     {
         var produit = await _repository.GetByIdAsync(id);
@@ -40,8 +43,8 @@ public class ProduitsController : ControllerBase
 
     // GET: api/Produit/marque/5
     [HttpGet("marque/{idMarque:int}")]
-    public async Task<ActionResult<IEnumerable<Produit>>> GetByMarque(
-        int idMarque)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult<IEnumerable<Produit>>> GetByMarque(int idMarque)
     {
         var produits = await _repository.GetByMarqueAsync(idMarque);
 
@@ -50,6 +53,8 @@ public class ProduitsController : ControllerBase
 
     // GET: api/produits/recherche?name=ordinateur
     [HttpGet("recherche")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<IEnumerable<Produit>>> SearchByName(
         [FromQuery] string name)
     {
@@ -66,12 +71,14 @@ public class ProduitsController : ControllerBase
     // PUT: api/Produit/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{produitid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> PutProduit(int produitid, Produit produit)
     {
         if (produitid != produit.ProduitId)
         {
-            return BadRequest(
-                "L'identifiant de l'URL ne correspond pas au produit.");
+            return BadRequest("L'identifiant de l'URL ne correspond pas au produit.");
         }
 
         var existingProduit = await _repository.GetByIdAsync(produitid);
@@ -82,6 +89,7 @@ public class ProduitsController : ControllerBase
         }
 
         await _repository.UpdateAsync(existingProduit, produit);
+        await _repository.SaveAsync();
 
         return NoContent();
     }
@@ -89,15 +97,20 @@ public class ProduitsController : ControllerBase
     // POST: api/Produit
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<Produit>> PostProduit(Produit produit)
     {
         await _repository.AddAsync(produit);
+        await _repository.SaveAsync();
 
         return CreatedAtAction(nameof(GetById), new { id = produit.ProduitId }, produit);
     }
 
     // DELETE: api/Produit/5
     [HttpDelete("{produitid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteProduit(int produitid)
     {
         var produit = await _repository.GetByIdAsync(produitid);
@@ -108,6 +121,7 @@ public class ProduitsController : ControllerBase
         }
 
         await _repository.DeleteAsync(produit);
+        await _repository.SaveAsync();
 
         return NoContent();
     }

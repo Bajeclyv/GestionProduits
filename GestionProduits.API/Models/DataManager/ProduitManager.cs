@@ -31,7 +31,6 @@ namespace GestionProduits.API.Models.DataManager
         public async Task AddAsync(Produit entity)
         {
             await _context.Produits.AddAsync(entity);
-            await _context.SaveChangesAsync();
         }
         public async Task UpdateAsync(Produit produit, Produit entity)
         {
@@ -46,13 +45,11 @@ namespace GestionProduits.API.Models.DataManager
             produit.StockReel = entity.StockReel;
             produit.StockMin = entity.StockMin;
             produit.StockMax = entity.StockMax;
-            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(Produit produit)
         {
             _context.Produits.Remove(produit);
-            await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<Produit>> GetAllWithDetailsAsync()
@@ -83,6 +80,11 @@ namespace GestionProduits.API.Models.DataManager
             return await _context.Produits
                 .Where(p => p.NomProduit.Contains(name))
                 .ToListAsync();
+        }
+
+        public async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }

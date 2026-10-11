@@ -1,0 +1,18 @@
+services:
+  postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile-postgres
+    container_name: postgres_db
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+      POSTGRES_DB: produitsdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
