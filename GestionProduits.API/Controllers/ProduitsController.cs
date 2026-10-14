@@ -2,6 +2,9 @@ using GestionProduits.API.Models.EntityFramework;
 using GestionProduits.API.Models.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using GestionProduits.API.Models.DTO;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -18,7 +21,7 @@ public class ProduitsController : ControllerBase
     // GET: api/Produit
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<Produit>>> GetAll()
+    public async Task<ActionResult<IEnumerable<ProduitDto>>> GetAll()
     {
         var produits = await _repository.GetAllAsync();
 
@@ -29,7 +32,7 @@ public class ProduitsController : ControllerBase
     [HttpGet("{produitid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<Produit>> GetById(int id)
+    public async Task<ActionResult<ProduitDto>> GetById(int id)
     {
         var produit = await _repository.GetByIdAsync(id);
 
@@ -44,7 +47,7 @@ public class ProduitsController : ControllerBase
     // GET: api/Produit/marque/5
     [HttpGet("marque/{idMarque:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<Produit>>> GetByMarque(int idMarque)
+    public async Task<ActionResult<IEnumerable<ProduitDto>>> GetByMarque(int idMarque)
     {
         var produits = await _repository.GetByMarqueAsync(idMarque);
 
@@ -55,7 +58,7 @@ public class ProduitsController : ControllerBase
     [HttpGet("recherche")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<IEnumerable<Produit>>> SearchByName(
+    public async Task<ActionResult<IEnumerable<ProduitDto>>> SearchByName(
         [FromQuery] string name)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -74,9 +77,9 @@ public class ProduitsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> PutProduit(int produitid, Produit produit)
+    public async Task<ActionResult> PutProduit(int produitid, ProduitDto produit)
     {
-        if (produitid != produit.ProduitId)
+        if (produitid != produit.Id)
         {
             return BadRequest("L'identifiant de l'URL ne correspond pas au produit.");
         }
@@ -99,12 +102,12 @@ public class ProduitsController : ControllerBase
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<Produit>> PostProduit(Produit produit)
+    public async Task<ActionResult<ProduitDto>> PostProduit(ProduitDto produit)
     {
         await _repository.AddAsync(produit);
         await _repository.SaveAsync();
 
-        return CreatedAtAction(nameof(GetById), new { id = produit.ProduitId }, produit);
+        return CreatedAtAction(nameof(GetById), new { id = produit.Id }, produit);
     }
 
     // DELETE: api/Produit/5

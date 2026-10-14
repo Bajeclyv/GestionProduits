@@ -30,7 +30,7 @@ namespace GestionProduits.API.Models.EntityFramework
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("Server=localhost,5432;Database=produitsdb;UserId=postgres;Password=postgres;TrustServerCertificate=True");
+            optionsBuilder.UseNpgsql("Server=localhost,5432;Database=produitsdb;UserId=postgres;Password=;TrustServerCertificate=True");
 
             // optionsBuilder.UseLoggerFactory(MyLoggerFactory).EnableSensitiveDataLogging()
             //               .UseNpgsql();

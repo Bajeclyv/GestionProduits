@@ -1,5 +1,5 @@
 ﻿using GestionProduits.API.Controllers;
-using GestionProduits.API.Models.EntityFramework;
+using GestionProduits.API.Models.DTO;
 using GestionProduits.API.Models.Repository;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +18,6 @@ namespace GestionProduits.Tests
         public void Initialize()
         {
             _mockRepository = new Mock<IProduitRepository>();
-
             _controller = new ProduitsController(_mockRepository.Object);
         }
 
@@ -27,8 +26,7 @@ namespace GestionProduits.Tests
         {
             // Arrange
             int id = 1;
-            var produit = new Produit { ProduitId = id };
-
+            var produit = new ProduitDto { Id = id, Nom = "Produit test" };
 
             _mockRepository
                 .Setup(r => r.GetByIdAsync(id))
@@ -39,13 +37,13 @@ namespace GestionProduits.Tests
 
             // Assert
             var okResult = Assert.IsInstanceOfType<OkObjectResult>(result.Result);
+
             Assert.AreEqual(200, okResult.StatusCode);
             Assert.AreSame(produit, okResult.Value);
 
             _mockRepository.Verify(
                 r => r.GetByIdAsync(id),
-                Times.Once
-            );
+                Times.Once);
         }
 
         [TestMethod]
@@ -56,21 +54,30 @@ namespace GestionProduits.Tests
 
             _mockRepository
                 .Setup(r => r.GetByIdAsync(id))
-                .ReturnsAsync((Produit?)null);
+                .ReturnsAsync((ProduitDto?)null);
 
             // Act
             var result = await _controller.GetById(id);
-            // var okResult = (NotFoundResult)result.Result;
 
             // Assert
             Assert.IsInstanceOfType<NotFoundResult>(result.Result);
+
+            _mockRepository.Verify(
+                r => r.GetByIdAsync(id),
+                Times.Once);
         }
 
         [TestMethod]
         public async Task PostProduit_ValidProduct_ReturnsCreatedAtAction()
         {
             // Arrange
-            var produit = new Produit { ProduitId = 1 };
+            var produit = new ProduitDto
+            {
+                Id = 1,
+                Nom = "Produit test",
+                Type = "Informatique",
+                Marque = "Marque test"
+            };
 
             _mockRepository
                 .Setup(r => r.AddAsync(produit))
@@ -91,13 +98,11 @@ namespace GestionProduits.Tests
 
             _mockRepository.Verify(
                 r => r.AddAsync(produit),
-                Times.Once
-            );
+                Times.Once);
 
             _mockRepository.Verify(
                 r => r.SaveAsync(),
-                Times.Once
-            );
+                Times.Once);
         }
 
         [TestMethod]
@@ -105,7 +110,7 @@ namespace GestionProduits.Tests
         {
             // Arrange
             int id = 1;
-            var produit = new Produit { ProduitId = 2 };
+            var produit = new ProduitDto { Id = 2, Nom = "Produit modifié" };
 
             // Act
             var result = await _controller.PutProduit(id, produit);
@@ -115,13 +120,13 @@ namespace GestionProduits.Tests
 
             _mockRepository.Verify(
                 r => r.SaveAsync(),
-                Times.Never
-            );
+                Times.Never);
 
             _mockRepository.Verify(
-                r => r.UpdateAsync(produit, It.IsAny<Produit>()),
-                Times.Never
-            );
+                r => r.UpdateAsync(
+                    It.IsAny<ProduitDto>(),
+                    It.IsAny<ProduitDto>()),
+                Times.Never);
         }
 
         [TestMethod]
@@ -129,7 +134,7 @@ namespace GestionProduits.Tests
         {
             // Arrange
             int id = 1;
-            var produit = new Produit { ProduitId = id };
+            var produit = new ProduitDto { Id = id, Nom = "Produit test" };
 
             _mockRepository
                 .Setup(r => r.GetByIdAsync(id))
@@ -151,13 +156,11 @@ namespace GestionProduits.Tests
 
             _mockRepository.Verify(
                 r => r.DeleteAsync(produit),
-                Times.Once
-            );
+                Times.Once);
 
             _mockRepository.Verify(
                 r => r.SaveAsync(),
-                Times.Once
-            );
+                Times.Once);
         }
     }
 }
