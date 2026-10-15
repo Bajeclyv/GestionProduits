@@ -30,7 +30,7 @@ namespace GestionProduits.API.Models.EntityFramework
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("Server=localhost,5432;Database=produitsdb;UserId=postgres;Password=;TrustServerCertificate=True");
+            optionsBuilder.UseNpgsql("Server=localhost;Port=5432;Database=produitsdb;Username=postgres;Password=postgres;TrustServerCertificate=True");
 
             // optionsBuilder.UseLoggerFactory(MyLoggerFactory).EnableSensitiveDataLogging()
             //               .UseNpgsql();
@@ -41,7 +41,10 @@ namespace GestionProduits.API.Models.EntityFramework
             modelBuilder.HasDefaultSchema("public");
 
             modelBuilder.Entity<Produit>()
-                        .HasIndex(t => t.NomProduit);
+                .Property(p => p.ProduitId)
+                .ValueGeneratedOnAdd();
+            modelBuilder.Entity<Produit>()
+                        .HasIndex(t => t.Nom);
 
             OnModelCreatingPartial(modelBuilder);
         }

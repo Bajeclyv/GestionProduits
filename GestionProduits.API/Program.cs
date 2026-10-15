@@ -3,6 +3,7 @@ using GestionProduits.API.Models.DTO;
 using GestionProduits.API.Models.EntityFramework;
 using GestionProduits.API.Models.Repository;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using AutoMapper;
 
 namespace GestionProduits.API
@@ -23,10 +24,10 @@ namespace GestionProduits.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddScoped<IDataRepository<ProduitDto>, IProduitRepository>();
+            builder.Services.AddScoped<IDataRepository<ProduitDto>, ProduitManager>();
             builder.Services.AddScoped<IProduitRepository, ProduitManager>();
-            
-            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
             var app = builder.Build();
 

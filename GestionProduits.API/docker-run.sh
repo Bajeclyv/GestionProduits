@@ -1,0 +1,1 @@
+docker run -d --name=produitsdb -p 5432:5432 -e POSTGRES_DB=produitsdb -e POSTGRES_USER=postgres -e POSTGRES_HOST_AUTH_METHOD=trust -v pgdata_movie:/var/lib/postgresql/data -v ./init.sql:/docker-entrypoint-initdb.d/init.sql postgres:16

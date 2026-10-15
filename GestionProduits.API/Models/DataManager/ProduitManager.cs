@@ -87,7 +87,7 @@ namespace GestionProduits.API.Models.DataManager
         public async Task<IEnumerable<ProduitDto>> SearchByNameAsync(string name)
         {
             return await _context.Produits
-                .Where(p => p.NomProduit.Contains(name))
+                .Where(p => p.Nom.Contains(name))
                 .ProjectTo<ProduitDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }

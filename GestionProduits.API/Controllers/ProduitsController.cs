@@ -29,7 +29,7 @@ public class ProduitsController : ControllerBase
     }
 
     // GET: api/Produit/5
-    [HttpGet("{produitid}")]
+    [HttpGet("{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ProduitDto>> GetById(int id)

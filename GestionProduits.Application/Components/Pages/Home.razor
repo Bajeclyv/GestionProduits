@@ -1,0 +1,183 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using System.Net.Http.Json
+@using GestionProduits.Application.Models
+@inject IHttpClientFactory HttpClientFactory
+
+<PageTitle>Gestion des produits</PageTitle>
+
+<section class="products-page">
+    <header class="page-header">
+        <div>
+            <p class="eyebrow">CATALOGUE</p>
+            <h1>Gestion des produits</h1>
+            <p class="subtitle">Consultez et gérez les produits de votre catalogue.</p>
+        </div>
+        <div class="product-count"><strong>@_products.Count</strong><span>produit(s)</span></div>
+    </header>
+
+    <section class="add-panel">
+        <h2>Ajouter un produit</h2>
+        <EditForm Model="_form" OnValidSubmit="AddProductAsync" class="add-form">
+            <DataAnnotationsValidator />
+            <label for="product-name">Nom du produit</label>
+            <div class="form-row">
+                <InputText id="product-name" @bind-Value="_form.Name" class="form-control" placeholder="Ex. Clavier sans fil" />
+                <button class="btn btn-primary" type="submit" disabled="@(_isSaving || string.IsNullOrWhiteSpace(_form.Name))">
+                    @(_isSaving ? "Ajout…" : "Ajouter")
+                </button>
+            </div>
+            <ValidationMessage For="@(() => _form.Name)" />
+        </EditForm>
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(_message))
+    {
+        <div class="alert @(_hasError ? "alert-danger" : "alert-success")" role="alert">@_message</div>
+    }
+
+    <section class="catalog-panel">
+        <div class="section-heading">
+            <div>
+                <h2>Catalogue</h2>
+                <p>Les données sont chargées depuis l’API GestionProduits.</p>
+            </div>
+            <button class="btn btn-outline-secondary" @onclick="LoadProductsAsync" disabled="@_isLoading">Actualiser</button>
+        </div>
+
+        @if (_isLoading)
+        {
+            <p class="empty-state">Chargement des produits…</p>
+        }
+        else if (_products.Count == 0)
+        {
+            <p class="empty-state">Aucun produit à afficher. Vous pouvez en ajouter ci-dessus.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Produit</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Marque</th>
+                            <th scope="col" class="action-column">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in _products)
+                        {
+                            <tr @key="product.Id">
+                                <td><span class="product-name">@product.Nom</span><span class="product-id">Réf. #@product.Id</span></td>
+                                <td>@(string.IsNullOrWhiteSpace(product.Type) ? "—" : product.Type)</td>
+                                <td>@(string.IsNullOrWhiteSpace(product.Marque) ? "—" : product.Marque)</td>
+                                <td class="action-column">
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteProductAsync(product)" disabled="@(_deletingId == product.Id)">
+                                        @(_deletingId == product.Id ? "Suppression…" : "Supprimer")
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</section>
+
+@code {
+    private readonly List<ProduitDto> _products = [];
+    private readonly ProductForm _form = new();
+    private bool _isLoading = true;
+    private bool _isSaving;
+    private bool _hasError;
+    private int? _deletingId;
+    private string? _message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProductsAsync();
+    }
+
+    private async Task LoadProductsAsync()
+    {
+        _isLoading = true;
+        _message = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GestionProduitsApi");
+            var products = await client.GetFromJsonAsync<List<ProduitDto>>("api/Produits");
+            _products.Clear();
+            _products.AddRange(products ?? []);
+        }
+        catch (HttpRequestException)
+        {
+            _hasError = true;
+            _message = "Impossible de joindre l’API. Vérifiez qu’elle est démarrée et que ApiBaseUrl est correct.";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task AddProductAsync()
+    {
+        _isSaving = true;
+        _message = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GestionProduitsApi");
+            using var response = await client.PostAsJsonAsync("api/Produits", new ProduitDto { Nom = _form.Name.Trim() });
+            response.EnsureSuccessStatusCode();
+            _form.Name = string.Empty;
+            await LoadProductsAsync();
+            _hasError = false;
+            _message = "Le produit a été ajouté.";
+        }
+        catch (HttpRequestException)
+        {
+            _hasError = true;
+            _message = "L’ajout a échoué. Vérifiez que l’API est disponible.";
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private async Task DeleteProductAsync(ProduitDto product)
+    {
+        _deletingId = product.Id;
+        _message = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GestionProduitsApi");
+            using var response = await client.DeleteAsync($"api/Produits/{product.Id}");
+            response.EnsureSuccessStatusCode();
+            _products.Remove(product);
+            _hasError = false;
+            _message = $"« {product.Nom} » a été supprimé.";
+        }
+        catch (HttpRequestException)
+        {
+            _hasError = true;
+            _message = "La suppression a échoué. Vérifiez que l’API est disponible.";
+        }
+        finally
+        {
+            _deletingId = null;
+        }
+    }
+
+    private sealed class ProductForm
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Le nom est obligatoire.")]
+        [System.ComponentModel.DataAnnotations.StringLength(120, ErrorMessage = "Le nom ne peut pas dépasser 120 caractères.")]
+        public string Name { get; set; } = string.Empty;
+    }
+}

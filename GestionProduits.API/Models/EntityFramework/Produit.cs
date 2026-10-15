@@ -12,7 +12,7 @@ namespace GestionProduits.API.Models.EntityFramework
         public int ProduitId { get; set; }
 
         [Column("pdt_nomproduit")]
-        public string NomProduit { get; set; } = "";
+        public string Nom { get; set; } = "nom générique";
 
         [Column("pdt_description")]
         public string? Description { get; set; }
@@ -34,7 +34,7 @@ namespace GestionProduits.API.Models.EntityFramework
         public TypeProduit? Type { get; set; }
 
         [Column("pdt_stockreel")]
-        public int StockReel { get; set; }
+        public int Stock { get; set; }
 
         [Column("pdt_stockmin")]
         public int StockMin { get; set; }
