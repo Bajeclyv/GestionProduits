@@ -1,48 +1,38 @@
 # GestionProduits
 
-Lien vers le dépôt GitHub : [Bajeclyv/GestionProduits](https://github.com/Bajeclyv/GestionProduits)
+Lien vers le dÃ©pÃ´t GitHub : [Bajeclyv/GestionProduits](https://github.com/Bajeclyv/GestionProduits)
 
 Application .NET 8 de gestion de produits, marques et types de produits, avec une API ASP.NET Core, une interface Blazor Server et PostgreSQL.
 
 ## Projets
 
-- **GestionProduits.API** : API REST, accès aux données via Entity Framework Core et PostgreSQL. Swagger est disponible en environnement Development.
-- **GestionProduits.Application** : interface Blazor Server interactive. Elle consomme l’API par HTTP et n’accède pas directement à la base de données, ce qui sépare la présentation de la persistance.
-- **GestionProduits.Tests** : tests MSTest. Moq sert à isoler les contrôleurs dans les tests unitaires ; les tests d’intégration vérifient le fonctionnement avec PostgreSQL.
+- **GestionProduits.API** : API REST, accÃ¨s aux donnÃ©es via Entity Framework Core et PostgreSQL. Swagger est disponible en environnement Development.
+- **GestionProduits.Application** : interface Blazor Server interactive. Elle consomme lâ€™API par HTTP et nâ€™accÃ¨de pas directement Ã  la base de donnÃ©es, ce qui sÃ©pare la prÃ©sentation de la persistance.
+- **GestionProduits.Tests** : tests MSTest. Moq sert Ã  isoler les contrÃ´leurs dans les tests unitaires ; les tests dâ€™intÃ©gration vÃ©rifient le fonctionnement avec PostgreSQL.
 
-## Choix d’architecture
+## Choix dâ€™architecture
 
-- **DTO et AutoMapper** : les objets échangés par l’API sont distincts des entités EF Core. Les profils AutoMapper centralisent les conversions et les noms de propriétés exposés.
-- **CRUD générique** : `GenericDataManager<TEntity, TDto>` et `GenericCrudController<TDto>` factorisent les opérations communes. Les gestionnaires et contrôleurs spécialisés peuvent conserver leurs requêtes propres sans recopier le CRUD.
-- **Contrat `IEntityDto`** : fournit un identifiant commun aux DTO utilisés par le CRUD générique, indépendamment du nom de clé primaire dans chaque entité.
-- **Clés générées par PostgreSQL** : les clés sont générées à l’insertion ; le gestionnaire reporte l’identifiant créé dans le DTO après `SaveChangesAsync`.
-- **Composant Blazor partagé** : les pages Marques et Types de produits réutilisent le même composant de consultation et de gestion afin d’éviter de dupliquer l’interface.
+- **DTO et AutoMapper** : les objets Ã©changÃ©s par lâ€™API sont distincts des entitÃ©s EF Core.
+- **CRUD gÃ©nÃ©rique** : `GenericDataManager<TEntity, TDto>` et `GenericCrudController<TDto>` factorisent les opÃ©rations communes.
+- **Contrat `IEntityDto`** : fournit un identifiant commun aux DTO utilisÃ©s par le CRUD gÃ©nÃ©rique, indÃ©pendamment du nom de clÃ© primaire dans chaque entitÃ©.
+- **ClÃ©s gÃ©nÃ©rÃ©es par PostgreSQL** : les clÃ©s sont gÃ©nÃ©rÃ©es Ã  lâ€™insertion ; le gestionnaire reporte lâ€™identifiant crÃ©Ã© dans le DTO aprÃ¨s `SaveChangesAsync`.
+- **Composants Blazor partagÃ©s** : les pages Marques et Types de produits rÃ©utilisent le mÃªme composant de consultation et de gestion afin dâ€™Ã©viter de dupliquer lâ€™interface.
 
-## Configuration et démarrage
+## Configuration et dÃ©marrage
 
-1. Démarrer PostgreSQL et créer la base `produitsdb`.
-2. Adapter `GestionProduits.API/appsettings.json` (`ConnectionStrings:GestionProduitsContext`) à votre environnement.
+1. CrÃ©er la base de donnÃ©es PostgreSQL Ã  l'aide du Dockerfile.
+2. Adapter `GestionProduits.API/appsettings.json` (`ConnectionStrings:GestionProduitsContext`) Ã  votre environnement.
 3. Appliquer les migrations :
 
    ```bash
-   dotnet ef database update --project GestionProduits.API/GestionProduits.API.csproj --startup-project GestionProduits.API/GestionProduits.API.csproj
+   dotnet ef database update --project GestionProduits.API/GestionProduits.API.csproj
    ```
 
-4. Démarrer l’API et l’application Blazor dans deux terminaux :
+4. DÃ©marrer lâ€™API et lâ€™application Blazor
+   Le profil HTTPS de lâ€™API Ã©coute sur `https://localhost:7112`. Cette adresse est configurÃ©e dans `GestionProduits.Application/appsettings.json` (`ApiBaseUrl`) ; adaptez-la si nÃ©cessaire. Swagger est disponible Ã  `https://localhost:7112/swagger`.
 
-   ```bash
-   dotnet run --project GestionProduits.API/GestionProduits.API.csproj --launch-profile https
-   dotnet run --project GestionProduits.Application/GestionProduits.Application.csproj
-   ```
-
-   Le profil HTTPS de l’API écoute sur `https://localhost:7112`. Cette adresse est configurée dans `GestionProduits.Application/appsettings.json` (`ApiBaseUrl`) ; adaptez-la si nécessaire. Swagger est disponible à `https://localhost:7112/swagger`.
-
-Les routes de gestion sont `api/Produits`, `api/Marques` et `api/TypesProduits`. L’interface Blazor propose les pages `/`, `/marques` et `/types-produits`.
+Les routes de gestion sont `api/Produits`, `api/Marques` et `api/TypesProduits`. Lâ€™interface Blazor propose les pages `/`, `/marques` et `/types-produits`.
 
 ## Tests
 
-```bash
-dotnet test GestionProduits.Tests/GestionProduits.Tests.csproj
-```
-
-Les tests unitaires de contrôleurs n’ont pas besoin de PostgreSQL. **Attention :** `ProduitsControllerIntegrationTests` appelle `EnsureDeletedAsync()` sur la base `produitsdb` configurée dans le test. Cette opération supprime la base et ses données. Avant de lancer ces tests, configurez une base dédiée et remplacez la chaîne de connexion du test ; ne pointez pas les tests vers une base contenant des données à conserver.
+Les tests unitaires de contrÃ´leurs nâ€™ont pas besoin de PostgreSQL. **Attention :** `ProduitsControllerIntegrationTests` appelle `EnsureDeletedAsync()` sur la base `produitsdb` configurÃ©e dans le test. Cette opÃ©ration supprime la base et ses donnÃ©es. Avant de lancer ces tests, configurez une base dÃ©diÃ©e et remplacez la chaÃ®ne de connexion du test ; ne pointez pas les tests vers une base contenant des donnÃ©es Ã  conserver.
