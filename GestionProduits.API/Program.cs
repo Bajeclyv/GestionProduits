@@ -26,6 +26,8 @@ namespace GestionProduits.API
 
             builder.Services.AddScoped<IDataRepository<ProduitDto>, ProduitManager>();
             builder.Services.AddScoped<IProduitRepository, ProduitManager>();
+            builder.Services.AddScoped<IDataRepository<MarqueDto>, MarqueManager>();
+            builder.Services.AddScoped<IDataRepository<TypeProduitDto>, TypeProduitManager>();
 
             builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 

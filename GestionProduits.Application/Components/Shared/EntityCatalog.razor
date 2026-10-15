@@ -1,0 +1,181 @@
+@using System.Net.Http.Json
+@using GestionProduits.Application.Models
+@inject IHttpClientFactory HttpClientFactory
+
+<section class="catalog-page">
+    <header class="page-header">
+        <div>
+            <p class="eyebrow">PARAMÈTRES DU CATALOGUE</p>
+            <h1>@Title</h1>
+            <p class="subtitle">Consultez et gérez les éléments du catalogue.</p>
+        </div>
+        <div class="item-count"><strong>@_items.Count</strong><span>élément(s)</span></div>
+    </header>
+
+    <section class="panel add-panel">
+        <h2>Ajouter</h2>
+        <EditForm Model="_form" OnValidSubmit="AddAsync">
+            <DataAnnotationsValidator />
+            <label for="catalog-name">Nom</label>
+            <div class="form-row">
+                <InputText id="catalog-name" @bind-Value="_form.Name" class="form-control" />
+                <button class="btn btn-primary" type="submit" disabled="@(_isSaving || string.IsNullOrWhiteSpace(_form.Name))">
+                    @(_isSaving ? "Ajout…" : "Ajouter")
+                </button>
+            </div>
+            <ValidationMessage For="@(() => _form.Name)" />
+        </EditForm>
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(_message))
+    {
+        <div class="alert @(_hasError ? "alert-danger" : "alert-success")" role="alert">@_message</div>
+    }
+
+    <section class="panel">
+        <div class="section-heading">
+            <h2>Liste</h2>
+            <button class="btn btn-outline-secondary" @onclick="LoadAsync" disabled="@_isLoading">Actualiser</button>
+        </div>
+
+        @if (_isLoading)
+        {
+            <p class="empty-state">Chargement…</p>
+        }
+        else if (_items.Count == 0)
+        {
+            <p class="empty-state">Aucun élément enregistré.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            @if (ShowProductCount)
+                            {
+                                <th>Produits associés</th>
+                            }
+                            <th class="action-column">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in _items)
+                        {
+                            <tr @key="item.Id">
+                                <td><span class="item-name">@item.Nom</span><span class="item-id">Réf. #@item.Id</span></td>
+                                @if (ShowProductCount)
+                                {
+                                    <td>@item.NbProduits</td>
+                                }
+                                <td class="action-column">
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteAsync(item)" disabled="@(_deletingId == item.Id)">
+                                        @(_deletingId == item.Id ? "Suppression…" : "Supprimer")
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</section>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public string ApiEndpoint { get; set; } = string.Empty;
+
+    [Parameter]
+    public bool ShowProductCount { get; set; }
+
+    private readonly List<CatalogItemDto> _items = [];
+    private readonly ItemForm _form = new();
+    private bool _isLoading = true;
+    private bool _isSaving;
+    private bool _hasError;
+    private int? _deletingId;
+    private string? _message;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _isLoading = true;
+        _message = null;
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GestionProduitsApi");
+            var items = await client.GetFromJsonAsync<List<CatalogItemDto>>(ApiEndpoint);
+            _items.Clear();
+            _items.AddRange(items ?? []);
+        }
+        catch (HttpRequestException)
+        {
+            _hasError = true;
+            _message = "Impossible de joindre l’API. Vérifiez qu’elle est démarrée.";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task AddAsync()
+    {
+        _isSaving = true;
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GestionProduitsApi");
+            using var response = await client.PostAsJsonAsync(ApiEndpoint, new CatalogItemDto { Nom = _form.Name.Trim() });
+            response.EnsureSuccessStatusCode();
+            _form.Name = string.Empty;
+            await LoadAsync();
+            _hasError = false;
+            _message = "L’élément a été ajouté.";
+        }
+        catch (HttpRequestException)
+        {
+            _hasError = true;
+            _message = "L’ajout a échoué. Vérifiez la disponibilité de l’API.";
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private async Task DeleteAsync(CatalogItemDto item)
+    {
+        _deletingId = item.Id;
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GestionProduitsApi");
+            using var response = await client.DeleteAsync($"{ApiEndpoint}/{item.Id}");
+            response.EnsureSuccessStatusCode();
+            _items.Remove(item);
+            _hasError = false;
+            _message = $"« {item.Nom} » a été supprimé.";
+        }
+        catch (HttpRequestException)
+        {
+            _hasError = true;
+            _message = "La suppression a échoué. Un élément utilisé par des produits ne peut pas être supprimé.";
+        }
+        finally
+        {
+            _deletingId = null;
+        }
+    }
+
+    private sealed class ItemForm
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Le nom est obligatoire.")]
+        [System.ComponentModel.DataAnnotations.StringLength(50, MinimumLength = 1)]
+        public string Name { get; set; } = string.Empty;
+    }
+}

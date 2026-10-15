@@ -69,6 +69,21 @@ namespace GestionProduits.API.Models.DTO
                 .ForMember(
                     dest => dest.NbProduits,
                     opt => opt.MapFrom(src => src.Produits.Count()));
+
+            CreateMap<MarqueDto, Marque>(MemberList.Destination)
+                .ForMember(dest => dest.MarqueId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.NomMarque, opt => opt.MapFrom(src => src.Nom))
+                .ForMember(dest => dest.Produits, opt => opt.Ignore());
+
+            CreateMap<TypeProduit, TypeProduitDto>(MemberList.Destination)
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.TypeProduitId))
+                .ForMember(dest => dest.Nom, opt => opt.MapFrom(src => src.NomTypeProduit))
+                .ForMember(dest => dest.NbProduits, opt => opt.MapFrom(src => src.Produits.Count()));
+
+            CreateMap<TypeProduitDto, TypeProduit>(MemberList.Destination)
+                .ForMember(dest => dest.TypeProduitId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.NomTypeProduit, opt => opt.MapFrom(src => src.Nom))
+                .ForMember(dest => dest.Produits, opt => opt.Ignore());
         }
     }
 }

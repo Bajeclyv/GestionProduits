@@ -1,0 +1,147 @@
+.catalog-page {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 1.5rem 0 3rem;
+    color: #172033;
+}
+
+.page-header,
+.section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.eyebrow {
+    margin-bottom: .4rem;
+    color: #5474da;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+}
+
+h1 {
+    margin: 0;
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 750;
+}
+
+.subtitle,
+.section-heading p {
+    margin: .5rem 0 0;
+    color: #687386;
+}
+
+.item-count {
+    display: grid;
+    min-width: 100px;
+    padding: .8rem 1rem;
+    border: 1px solid #e5e9f1;
+    border-radius: 12px;
+    background: #fff;
+    text-align: center;
+}
+
+.item-count strong {
+    font-size: 1.4rem;
+}
+
+.item-count span {
+    color: #687386;
+    font-size: .8rem;
+}
+
+.panel {
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    border: 1px solid #e5e9f1;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgb(26 39 68 / 4%);
+}
+
+h2 {
+    margin: 0 0 1rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.add-panel label {
+    display: block;
+    margin-bottom: .45rem;
+    font-size: .9rem;
+    font-weight: 600;
+}
+
+.form-row {
+    display: flex;
+    gap: .75rem;
+}
+
+.form-row .form-control {
+    max-width: 560px;
+}
+
+.section-heading {
+    margin-bottom: 1.2rem;
+}
+
+.table thead th {
+    color: #687386;
+    font-size: .78rem;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.item-name,
+.item-id {
+    display: block;
+}
+
+.item-name {
+    font-weight: 650;
+}
+
+.item-id {
+    margin-top: .15rem;
+    color: #8490a2;
+    font-size: .78rem;
+}
+
+.action-column {
+    text-align: right;
+}
+
+.empty-state {
+    margin: 0;
+    padding: 2rem 1rem;
+    border-radius: 10px;
+    background: #f7f8fb;
+    color: #687386;
+    text-align: center;
+}
+
+@media (max-width: 600px) {
+    .page-header,
+    .section-heading {
+        align-items: flex-start;
+    }
+
+    .form-row {
+        flex-direction: column;
+    }
+
+    .form-row .btn {
+        align-self: flex-start;
+    }
+
+    .panel {
+        padding: 1rem;
+    }
+}
